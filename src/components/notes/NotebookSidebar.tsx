@@ -407,7 +407,7 @@ export const NotebookSidebar: React.FC<NotebookSidebarProps> = ({
                 <Cpu className="w-3.5 h-3.5 text-accent" />
                 <span className="text-[11px] font-semibold">AI Engine:</span>
                 <span className="text-[11px] text-charcoal-muted truncate max-w-[100px]">
-                  {GroqClient.getSelectedModel().split('/')[1] || 'gpt-oss-120b'}
+                  {GroqClient.getSelectedModel().split('/').pop() || 'gpt-oss-120b'}
                 </span>
               </div>
               <span className={`w-2 h-2 rounded-full ${GroqClient.isConfigured() ? 'bg-emerald-500' : 'bg-amber-400 animate-pulse'}`} />

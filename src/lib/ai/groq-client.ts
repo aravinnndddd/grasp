@@ -4,91 +4,113 @@ export interface GroqMessage {
 }
 
 export type SupportedFreeModel = 
-  // Groq Official Models
-  | 'llama-3.3-70b-versatile'
-  | 'llama-3.1-8b-instant'
-  | 'mixtral-8x7b-32768'
-  | 'gemma2-9b-it'
-  // OpenRouter Free Models
-  | 'meta-llama/llama-3.3-70b-instruct:free'
-  | 'google/gemini-2.0-flash-exp:free'
-  | 'deepseek/deepseek-r1:free'
-  | 'qwen/qwen-2.5-coder-32b-instruct:free'
-  // Legacy Aliases
+  // Alibaba Cloud
+  | 'qwen/qwen3.8-27b'
+  // Canopy Labs
+  | 'canopylabs/orpheus-arabic-saudi'
+  | 'canopylabs/orpheus-v1-english'
+  // Meta
+  | 'meta-llama/llama-prompt-guard-2-22m'
+  | 'meta-llama/llama-prompt-guard-2-86m'
+  // OpenAI
   | 'openai/gpt-oss-120b'
   | 'openai/gpt-oss-20b'
-  | 'qwen/qwen3.8-27b'
-  | 'canopylabs/orpheus-v1-english';
+  | 'openai/gpt-oss-safeguard-20b'
+  | 'whisper-large-v3'
+  | 'whisper-large-v3-turbo'
+  // Legacy / fallback aliases
+  | 'llama-3.3-70b-versatile'
+  | 'llama-3.1-8b-instant';
+
+export type ModelCategory = 'Alibaba Cloud' | 'Canopy Labs' | 'Meta' | 'OpenAI' | 'Other';
 
 export interface FreeModelInfo {
   id: SupportedFreeModel;
   name: string;
+  category: ModelCategory;
   vendor: string;
-  provider: 'groq' | 'openrouter' | 'universal';
   description: string;
   isDefault?: boolean;
 }
 
 export const SUPPORTED_FREE_MODELS: FreeModelInfo[] = [
-  // --- GROQ OFFICIAL FREE MODELS (api.groq.com) ---
+  // --- ALIBABA CLOUD ---
   {
-    id: 'llama-3.3-70b-versatile',
-    name: 'Llama 3.3 70B Versatile',
-    vendor: 'Meta via Groq',
-    provider: 'groq',
-    description: 'Meta 70B parameter powerhouse on Groq LPUs. Highest reasoning fidelity, instant generation, perfect for KTU exam proofs and engineering analysis.',
+    id: 'qwen/qwen3.8-27b',
+    name: 'qwen/qwen3.8-27b',
+    category: 'Alibaba Cloud',
+    vendor: 'Alibaba Cloud',
+    description: '27B parameter powerhouse for code generation, algorithm tracing, and structural KTU computer science diagrams.',
+  },
+
+  // --- CANOPY LABS ---
+  {
+    id: 'canopylabs/orpheus-arabic-saudi',
+    name: 'canopylabs/orpheus-arabic-saudi',
+    category: 'Canopy Labs',
+    vendor: 'Canopy Labs',
+    description: 'Specialized expressive speech and language reasoning model (Arabic / Saudi dialect).',
+  },
+  {
+    id: 'canopylabs/orpheus-v1-english',
+    name: 'canopylabs/orpheus-v1-english',
+    category: 'Canopy Labs',
+    vendor: 'Canopy Labs',
+    description: 'Expressive English conversational pedagogy and vocal direction for interactive tutoring.',
+  },
+
+  // --- META ---
+  {
+    id: 'meta-llama/llama-prompt-guard-2-22m',
+    name: 'meta-llama/llama-prompt-guard-2-22m',
+    category: 'Meta',
+    vendor: 'Meta',
+    description: 'Ultra-lightweight prompt security and adversarial attack classifier (22M parameters).',
+  },
+  {
+    id: 'meta-llama/llama-prompt-guard-2-86m',
+    name: 'meta-llama/llama-prompt-guard-2-86m',
+    category: 'Meta',
+    vendor: 'Meta',
+    description: 'Robust multilingual prompt injection and jailbreak detection classifier (86M parameters).',
+  },
+
+  // --- OPENAI ---
+  {
+    id: 'openai/gpt-oss-120b',
+    name: 'openai/gpt-oss-120b',
+    category: 'OpenAI',
+    vendor: 'OpenAI',
+    description: '120B parameter open-weights flagship. Highest reasoning fidelity, deep mathematical proofs, and exhaustive KTU exam evaluation.',
     isDefault: true
   },
   {
-    id: 'llama-3.1-8b-instant',
-    name: 'Llama 3.1 8B Instant',
-    vendor: 'Meta via Groq',
-    provider: 'groq',
-    description: 'Ultra-fast throughput on Groq LPUs. Ideal for 3-mark definitions, quick flashcards, and instant concept recall.',
+    id: 'openai/gpt-oss-20b',
+    name: 'openai/gpt-oss-20b',
+    category: 'OpenAI',
+    vendor: 'OpenAI',
+    description: '20B parameter efficient model. High throughput, low latency for rapid 3-mark definitions and active recall quizzes.',
   },
   {
-    id: 'mixtral-8x7b-32768',
-    name: 'Mixtral 8x7B (32k Context)',
-    vendor: 'Mistral via Groq',
-    provider: 'groq',
-    description: 'MoE architecture with a massive 32,768 token window. Excellent for long syllabus cross-referencing and multi-module notes.',
+    id: 'openai/gpt-oss-safeguard-20b',
+    name: 'openai/gpt-oss-safeguard-20b',
+    category: 'OpenAI',
+    vendor: 'OpenAI',
+    description: '20B safety, content moderation, and alignment guardrail model.',
   },
   {
-    id: 'gemma2-9b-it',
-    name: 'Gemma 2 9B IT',
-    vendor: 'Google via Groq',
-    provider: 'groq',
-    description: 'Google Gemma 2 architecture optimized on Groq hardware for clear explanations and technical academic definitions.',
-  },
-
-  // --- OPENROUTER FREE MODELS (openrouter.ai) ---
-  {
-    id: 'meta-llama/llama-3.3-70b-instruct:free',
-    name: 'Llama 3.3 70B Instruct (Free)',
-    vendor: 'OpenRouter Free Tier',
-    provider: 'openrouter',
-    description: 'OpenRouter 100% free community tier. State-of-the-art 70B reasoning model without cost.',
+    id: 'whisper-large-v3',
+    name: 'whisper-large-v3',
+    category: 'OpenAI',
+    vendor: 'OpenAI',
+    description: 'State-of-the-art multilingual speech recognition audio model.',
   },
   {
-    id: 'google/gemini-2.0-flash-exp:free',
-    name: 'Gemini 2.0 Flash (Free)',
-    vendor: 'OpenRouter Free Tier',
-    provider: 'openrouter',
-    description: 'Google experimental multimodal model on OpenRouter free tier.',
-  },
-  {
-    id: 'deepseek/deepseek-r1:free',
-    name: 'DeepSeek R1 (Free Reasoning)',
-    vendor: 'OpenRouter Free Tier',
-    provider: 'openrouter',
-    description: 'Deep reasoning chain-of-thought open weights model on OpenRouter.',
-  },
-  {
-    id: 'qwen/qwen-2.5-coder-32b-instruct:free',
-    name: 'Qwen 2.5 Coder 32B (Free)',
-    vendor: 'OpenRouter Free Tier',
-    provider: 'openrouter',
-    description: 'Specialized code generation and algorithmic analysis model on OpenRouter free tier.',
+    id: 'whisper-large-v3-turbo',
+    name: 'whisper-large-v3-turbo',
+    category: 'OpenAI',
+    vendor: 'OpenAI',
+    description: 'Ultra-fast optimized multilingual transcription audio model.',
   }
 ];
 
@@ -134,16 +156,8 @@ export class GroqClient {
       // Auto-correct endpoint if appropriate
       if (cleaned.startsWith('gsk_')) {
         this.setEndpoint('https://api.groq.com/openai/v1/chat/completions');
-        const currentModel = this.getSelectedModel();
-        if (!currentModel.includes('llama') && !currentModel.includes('mixtral') && !currentModel.includes('gemma')) {
-          this.setSelectedModel('llama-3.3-70b-versatile');
-        }
       } else if (cleaned.startsWith('sk-or-')) {
         this.setEndpoint('https://openrouter.ai/api/v1/chat/completions');
-        const currentModel = this.getSelectedModel();
-        if (!currentModel.includes(':free')) {
-          this.setSelectedModel('meta-llama/llama-3.3-70b-instruct:free');
-        }
       }
     } catch (e) {
       // ignore
@@ -153,17 +167,13 @@ export class GroqClient {
   static getSelectedModel(): SupportedFreeModel {
     try {
       const stored = localStorage.getItem(this.MODEL_STORAGE_KEY) as SupportedFreeModel;
-      if (stored && SUPPORTED_FREE_MODELS.some(m => m.id === stored)) {
+      if (stored && (SUPPORTED_FREE_MODELS.some(m => m.id === stored) || stored.includes('/'))) {
         return stored;
       }
     } catch (e) {
       // ignore
     }
-    const key = this.getApiKey();
-    if (key.startsWith('sk-or-')) {
-      return 'meta-llama/llama-3.3-70b-instruct:free';
-    }
-    return 'llama-3.3-70b-versatile';
+    return 'openai/gpt-oss-120b';
   }
 
   static setSelectedModel(model: SupportedFreeModel): void {
@@ -223,36 +233,11 @@ export class GroqClient {
   }
 
   /**
-   * Resolves the best model for the current endpoint to avoid model mismatch errors
+   * Resolves the model to pass to the endpoint.
+   * Keeps the user's selected model verbatim without overriding.
    */
-  private static resolveModelForEndpoint(requestedModel: string, endpoint: string): string {
-    const isGroq = endpoint.includes('api.groq.com');
-    const isOpenRouter = endpoint.includes('openrouter.ai');
-
-    if (isGroq) {
-      // If requested model is not a Groq-native model, map to Groq's flagship
-      const groqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma2-9b-it'];
-      if (!groqModels.includes(requestedModel)) {
-        return 'llama-3.3-70b-versatile';
-      }
-      return requestedModel;
-    }
-
-    if (isOpenRouter) {
-      // Map legacy or Groq names to OpenRouter free models
-      if (requestedModel === 'llama-3.3-70b-versatile' || requestedModel === 'openai/gpt-oss-120b') {
-        return 'meta-llama/llama-3.3-70b-instruct:free';
-      }
-      if (requestedModel === 'llama-3.1-8b-instant' || requestedModel === 'openai/gpt-oss-20b') {
-        return 'meta-llama/llama-3.1-8b-instruct:free';
-      }
-      if (requestedModel === 'qwen/qwen3.8-27b') {
-        return 'qwen/qwen-2.5-coder-32b-instruct:free';
-      }
-      return requestedModel;
-    }
-
-    return requestedModel;
+  private static resolveModelForEndpoint(requestedModel: string, _endpoint: string): string {
+    return requestedModel || 'openai/gpt-oss-120b';
   }
 
   static async chatCompletion(

@@ -14,7 +14,7 @@ import {
   Sparkles,
   Server
 } from 'lucide-react';
-import { GroqClient, SUPPORTED_FREE_MODELS, SupportedFreeModel, FreeModelInfo } from '../../lib/ai/groq-client';
+import { GroqClient, SUPPORTED_FREE_MODELS, SupportedFreeModel, FreeModelInfo, ModelCategory } from '../../lib/ai/groq-client';
 
 interface GroqSettingsModalProps {
   isOpen: boolean;
@@ -24,7 +24,7 @@ interface GroqSettingsModalProps {
 export const GroqSettingsModal: React.FC<GroqSettingsModalProps> = ({ isOpen, onClose }) => {
   const [apiKey, setApiKey] = useState('');
   const [endpoint, setEndpoint] = useState('');
-  const [selectedModel, setSelectedModel] = useState<SupportedFreeModel>('llama-3.3-70b-versatile');
+  const [selectedModel, setSelectedModel] = useState<SupportedFreeModel>('openai/gpt-oss-120b');
   const [providerMode, setProviderMode] = useState<'groq' | 'openrouter' | 'custom'>('groq');
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string; latencyMs?: number } | null>(null);
@@ -64,16 +64,10 @@ export const GroqSettingsModal: React.FC<GroqSettingsModalProps> = ({ isOpen, on
       setProviderMode('groq');
       const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
       setEndpoint(groqUrl);
-      if (!selectedModel.includes('llama') && !selectedModel.includes('mixtral') && !selectedModel.includes('gemma')) {
-        setSelectedModel('llama-3.3-70b-versatile');
-      }
     } else if (cleaned.startsWith('sk-or-')) {
       setProviderMode('openrouter');
       const openRouterUrl = 'https://openrouter.ai/api/v1/chat/completions';
       setEndpoint(openRouterUrl);
-      if (!selectedModel.includes(':free')) {
-        setSelectedModel('meta-llama/llama-3.3-70b-instruct:free');
-      }
     }
   };
 
@@ -81,10 +75,8 @@ export const GroqSettingsModal: React.FC<GroqSettingsModalProps> = ({ isOpen, on
     setProviderMode(prov);
     if (prov === 'groq') {
       setEndpoint('https://api.groq.com/openai/v1/chat/completions');
-      setSelectedModel('llama-3.3-70b-versatile');
     } else if (prov === 'openrouter') {
       setEndpoint('https://openrouter.ai/api/v1/chat/completions');
-      setSelectedModel('meta-llama/llama-3.3-70b-instruct:free');
     }
   };
 
@@ -140,7 +132,7 @@ export const GroqSettingsModal: React.FC<GroqSettingsModalProps> = ({ isOpen, on
           { role: 'system', content: 'You are an academic testing agent. Reply with the exact word "CONNECTED".' },
           { role: 'user', content: 'ping' }
         ],
-        { model: selectedModel, maxTokens: 20 }
+        { model: selectedModel.startsWith('whisper-') ? 'openai/gpt-oss-120b' : selectedModel, maxTokens: 20 }
       );
 
       const latencyMs = Math.round(performance.now() - start);
@@ -161,12 +153,8 @@ export const GroqSettingsModal: React.FC<GroqSettingsModalProps> = ({ isOpen, on
     }
   };
 
-  // Filter models relevant to active provider mode
-  const displayedModels = SUPPORTED_FREE_MODELS.filter(m => {
-    if (providerMode === 'groq') return m.provider === 'groq';
-    if (providerMode === 'openrouter') return m.provider === 'openrouter';
-    return true;
-  });
+  const CATEGORIES: ModelCategory[] = ['Alibaba Cloud', 'Canopy Labs', 'Meta', 'OpenAI'];
+  const selectedModelInfo = SUPPORTED_FREE_MODELS.find(m => m.id === selectedModel);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-charcoal/60 backdrop-blur-sm animate-fade-in font-sans">
@@ -312,51 +300,74 @@ export const GroqSettingsModal: React.FC<GroqSettingsModalProps> = ({ isOpen, on
                 <Cpu className="w-3.5 h-3.5 text-accent" />
                 <span>SELECT MODEL</span>
               </span>
-              <span className="text-[10px] font-mono text-emerald-700 font-bold uppercase">
-                {providerMode === 'groq' ? '[GROQ FREE LPU]' : '[OPENROUTER FREE]'}
+              <span className="text-[10px] font-mono text-accent font-bold uppercase">
+                {selectedModel}
               </span>
             </label>
             
-            <div className="space-y-1.5">
-              {displayedModels.map((m) => {
-                const isSelected = selectedModel === m.id;
+            {/* Categorized Model Selector (Styled matching the user console) */}
+            <div className="bg-[#121214] border border-[#27272a] rounded-xs p-2.5 text-zinc-300 font-mono text-xs space-y-2.5 shadow-inner max-h-[310px] overflow-y-auto">
+              {CATEGORIES.map(category => {
+                const categoryModels = SUPPORTED_FREE_MODELS.filter(m => m.category === category);
+                if (categoryModels.length === 0) return null;
+
                 return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setSelectedModel(m.id)}
-                    className={`w-full p-2.5 text-left border transition-all flex items-start justify-between gap-2 cursor-pointer rounded-xs ${
-                      isSelected
-                        ? 'border-accent bg-accent/10 shadow-xs ring-1 ring-accent/30'
-                        : 'border-hairline hover:border-charcoal-muted/50 bg-paper'
-                    }`}
-                  >
+                  <div key={category} className="space-y-1">
+                    {/* Category Header with Divider Line */}
+                    <div className="flex items-center gap-2 pt-1 pb-0.5 px-1">
+                      <span className="text-[11px] font-medium text-amber-400/90 tracking-wide font-sans">
+                        {category}
+                      </span>
+                      <div className="h-[1px] bg-zinc-800 flex-1" />
+                    </div>
+
+                    {/* Model Items */}
                     <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-charcoal font-mono text-xs">{m.name}</span>
-                        {m.isDefault && (
-                          <span className="text-[9px] bg-accent/20 text-accent font-bold px-1.5 py-0.2 uppercase rounded-xs">
-                            RECOMMENDED
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-charcoal-muted font-sans leading-tight">
-                        {m.description}
-                      </p>
+                      {categoryModels.map(m => {
+                        const isSelected = selectedModel === m.id;
+                        return (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => setSelectedModel(m.id)}
+                            className={`w-full px-2.5 py-1.5 text-left rounded transition-all flex items-center justify-between cursor-pointer group text-xs ${
+                              isSelected
+                                ? 'bg-[#242427] text-white shadow-xs font-semibold'
+                                : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60'
+                            }`}
+                          >
+                            <span className="font-mono truncate">{m.id}</span>
+                            {isSelected && (
+                              <Check className="w-3.5 h-3.5 text-white shrink-0 ml-2" />
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
-                    <div className="mt-1 shrink-0">
-                      {isSelected ? (
-                        <div className="w-4 h-4 rounded-none bg-accent text-white flex items-center justify-center">
-                          <Check className="w-3 h-3" />
-                        </div>
-                      ) : (
-                        <div className="w-4 h-4 border border-hairline" />
-                      )}
-                    </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
+
+            {/* Selected Model Description */}
+            {selectedModelInfo && (
+              <div className="p-2 bg-paper border border-hairline rounded-xs text-[11px] font-sans flex items-start gap-2 animate-fade-in">
+                <Sparkles className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <div className="font-semibold text-charcoal flex items-center gap-1.5 font-mono text-xs">
+                    <span>{selectedModelInfo.id}</span>
+                    {selectedModelInfo.isDefault && (
+                      <span className="text-[9px] bg-accent/20 text-accent font-bold px-1 py-0.2 uppercase rounded-xs font-sans">
+                        Flagship
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-charcoal-muted leading-tight">
+                    {selectedModelInfo.description}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Endpoint URL Field */}
