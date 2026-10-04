@@ -23,17 +23,17 @@ export const SubjectStationBar: React.FC<SubjectBarProps> = ({
   const activeSubject = allSubjects.find(s => s.id === currentSubjectId) || allSubjects[0];
 
   return (
-    <div className={`bg-paper-200/90 border-b border-line-border py-2 px-4 overflow-x-auto ${className}`}>
-      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs font-mono-code min-w-max">
+    <div className={`bg-paper-200/90 border-b border-line-border py-2 px-3 sm:px-4 ${className}`}>
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 text-xs font-mono-code">
         
         {/* Left: Active Subject Indicator & One-Click Switcher Buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 w-full lg:w-auto">
           <span className="text-ink-500 font-bold uppercase text-[10px] tracking-wider flex items-center gap-1.5 shrink-0">
             <BookOpen className="w-3.5 h-3.5 text-terracotta" />
-            <span>SUBJECT:</span>
+            <span className="hidden xs:inline">SUBJECT:</span>
           </span>
 
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center gap-1.5">
             {primarySubjects.slice(0, 6).map(sub => {
               const isSelected = sub.id === currentSubjectId;
               let shortTag = 'PAPER';
@@ -48,7 +48,7 @@ export const SubjectStationBar: React.FC<SubjectBarProps> = ({
                 <button
                   key={sub.id}
                   onClick={() => onSelectSubject(sub.id)}
-                  className={`px-2.5 py-1 rounded text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-2.5 py-1 rounded text-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
                     isSelected
                       ? 'bg-ink-900 text-white font-bold shadow-xs'
                       : 'bg-white text-ink-700 border border-line-border hover:border-terracotta hover:text-ink-900'
@@ -70,7 +70,7 @@ export const SubjectStationBar: React.FC<SubjectBarProps> = ({
               onChange={(e) => {
                 if (e.target.value) onSelectSubject(e.target.value);
               }}
-              className="bg-white border border-line-border rounded px-2.5 py-1 text-xs font-mono-code font-semibold text-ink-800 hover:border-terracotta cursor-pointer"
+              className="bg-white border border-line-border rounded px-2.5 py-1 text-xs font-mono-code font-semibold text-ink-800 hover:border-terracotta cursor-pointer shrink-0 max-w-[130px] sm:max-w-none truncate"
             >
               {allSubjects.map(sub => (
                 <option key={sub.id} value={sub.id}>
@@ -82,7 +82,7 @@ export const SubjectStationBar: React.FC<SubjectBarProps> = ({
         </div>
 
         {/* Right: Active subject feedback */}
-        <div className="hidden lg:flex items-center gap-2 text-[11px] text-ink-600 font-mono-code">
+        <div className="hidden lg:flex items-center gap-2 text-[11px] text-ink-600 font-mono-code shrink-0">
           <span className="text-ink-400">Active Course:</span>
           <span className="font-bold text-ink-900 bg-white px-2 py-0.5 border border-line-border rounded-xs">
             {activeSubject.code} — {activeSubject.title}

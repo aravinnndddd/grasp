@@ -15,6 +15,18 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ fileUrl }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [containerWidth, setContainerWidth] = useState<number>(() => 
+    typeof window !== 'undefined' ? Math.min(window.innerWidth - 48, 800) : 600
+  );
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setContainerWidth(Math.min(window.innerWidth - 48, 800));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const onLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setLoading(false);
@@ -47,7 +59,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ fileUrl }) => {
         </div>
       )}
       {!error && (
-        <div className="overflow-auto max-h-[700px] p-2">
+        <div className="overflow-auto max-h-[700px] p-2 flex flex-col items-center">
           <Document
             file={fileUrl}
             onLoadSuccess={onLoadSuccess}
@@ -58,10 +70,10 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ fileUrl }) => {
               <Page
                 key={`page-${i + 1}`}
                 pageNumber={i + 1}
-                width={Math.min(window.innerWidth - 80, 800)}
+                width={containerWidth}
                 renderAnnotationLayer={false}
                 renderTextLayer={true}
-                className="my-2 shadow-sm"
+                className="my-2 shadow-sm max-w-full"
               />
             ))}
           </Document>

@@ -166,3 +166,27 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #A49F96;
 }
+
+/* Hide scrollbar utility for smooth horizontal touch carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Responsive margin line adjustments on small mobile screens */
+@media (max-width: 640px) {
+  .notebook-ruled-page {
+    background-image: 
+      linear-gradient(to right, transparent 24px, rgba(239, 68, 68, 0.45) 25px, transparent 26px, transparent 28px, rgba(239, 68, 68, 0.3) 29px, transparent 30px),
+      repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(147, 197, 253, 0.4) 28px);
+  }
+  .notebook-legal-pad {
+    background-image: 
+      linear-gradient(to right, transparent 24px, rgba(239, 68, 68, 0.45) 25px, transparent 26px, transparent 28px, rgba(239, 68, 68, 0.3) 29px, transparent 30px),
+      repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(217, 119, 6, 0.25) 28px);
+  }
+}
+

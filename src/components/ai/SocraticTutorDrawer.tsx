@@ -98,7 +98,14 @@ export const SocraticTutorDrawer: React.FC<TutorDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[460px] bg-white border-l border-line-border shadow-2xl flex flex-col font-sans animate-slideLeft">
+    <>
+      {/* Mobile backdrop */}
+      <div 
+        onClick={onClose}
+        className="fixed inset-0 bg-black/40 backdrop-blur-2xs z-40 sm:hidden"
+        title="Close Socratic Tutor"
+      />
+      <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[460px] bg-white border-l border-line-border shadow-2xl flex flex-col font-sans animate-slideLeft">
       {/* Header */}
       <div className="p-4 border-b border-line-border bg-paper-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -233,5 +240,6 @@ export const SocraticTutorDrawer: React.FC<TutorDrawerProps> = ({
         </button>
       </form>
     </div>
+  </>
   );
 };

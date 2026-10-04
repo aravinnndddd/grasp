@@ -434,20 +434,21 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
       {/* Sleek Minimal Top Navigation Bar (Non-Fullscreen View) */}
       {!isFullscreen && (
         <div className="bg-white border-b border-line-border sticky top-14 z-20 shadow-xs">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 flex-wrap">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3 overflow-x-auto no-scrollbar">
             
             {/* Sidebar Toggle & Course Context Pill */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="px-3 py-1.5 bg-paper hover:bg-paper-light border border-hairline hover:border-accent text-charcoal font-mono text-xs font-bold rounded flex items-center gap-2 transition-all shadow-2xs cursor-pointer"
+                className="px-2.5 sm:px-3 py-1.5 bg-paper hover:bg-paper-light border border-hairline hover:border-accent text-charcoal font-mono text-xs font-bold rounded flex items-center gap-1.5 sm:gap-2 transition-all shadow-2xs cursor-pointer"
                 title="Toggle Sidebar: Modules, Subjects, Paper Themes & Options"
               >
                 <PanelLeft className="w-4 h-4 text-accent" />
-                <span>Modules &amp; Settings</span>
+                <span className="hidden xs:inline">Modules &amp; Settings</span>
+                <span className="xs:hidden">Menu</span>
               </button>
 
-              <div className="flex items-center gap-2 font-mono text-xs">
+              <div className="flex items-center gap-1.5 font-mono text-xs">
                 <span className="font-bold text-accent px-2 py-0.5 bg-accent/10 border border-accent/20 rounded text-[11px]">
                   {currentSubjectNotes.subjectCode} • M{currentModule.moduleNum}
                 </span>
@@ -458,7 +459,7 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
             </div>
 
             {/* Main Action Bar: Drawing Tools + Page Navigation + Fullscreen */}
-            <div className="flex items-center gap-2 flex-wrap ml-auto">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
               {/* Whiteboard Toolbar */}
               <WhiteboardToolbar
                 isDrawingEnabled={isDrawingEnabled}
@@ -631,31 +632,31 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
       )}
 
       {/* Main Container with Customizable Notebook Page Wrapper */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 py-3 sm:py-6">
         
         {/* Page-Wise Navigation Station Bar */}
         {viewMode === 'page' && !isFullscreen && (
-          <div className="mb-4 bg-paper-50 border border-line-border p-2.5 rounded flex flex-wrap items-center justify-between gap-3 shadow-2xs text-xs font-mono">
+          <div className="mb-4 bg-paper-50 border border-line-border p-2 sm:p-2.5 rounded flex flex-wrap items-center justify-between gap-2 sm:gap-3 shadow-2xs text-xs font-mono">
             {/* Page Flipper Controls */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={() => setCurrentPageIndex(prev => Math.max(0, prev - 1))}
                 disabled={currentPageIndex === 0}
-                className="px-2.5 py-1 bg-white hover:bg-paper-200 disabled:opacity-30 border border-line-border rounded flex items-center gap-1 font-semibold text-charcoal transition-colors cursor-pointer"
+                className="px-2 sm:px-2.5 py-1 bg-white hover:bg-paper-200 disabled:opacity-30 border border-line-border rounded flex items-center gap-1 font-semibold text-charcoal transition-colors cursor-pointer text-xs"
                 title="Previous Page"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Prev Page</span>
               </button>
 
-              <span className="font-bold text-charcoal px-2 py-0.5 bg-paper-dark border border-hairline rounded">
-                Page {currentPageIndex + 1} of {totalPages}
+              <span className="font-bold text-charcoal px-2 py-0.5 bg-paper-dark border border-hairline rounded text-[11px] sm:text-xs">
+                P.{currentPageIndex + 1}/{totalPages}
               </span>
 
               <button
                 onClick={() => setCurrentPageIndex(prev => Math.min(totalPages - 1, prev + 1))}
                 disabled={currentPageIndex >= totalPages - 1}
-                className="px-2.5 py-1 bg-white hover:bg-paper-200 disabled:opacity-30 border border-line-border rounded flex items-center gap-1 font-semibold text-charcoal transition-colors cursor-pointer"
+                className="px-2 sm:px-2.5 py-1 bg-white hover:bg-paper-200 disabled:opacity-30 border border-line-border rounded flex items-center gap-1 font-semibold text-charcoal transition-colors cursor-pointer text-xs"
                 title="Next Page"
               >
                 <span className="hidden sm:inline">Next Page</span>
@@ -664,12 +665,12 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
             </div>
 
             {/* Quick Page Jump Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto py-1 max-w-full">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 max-w-full">
               {defaultPageConfigs.map((cfg, idx) => (
                 <button
                   key={cfg.id}
                   onClick={() => setCurrentPageIndex(idx)}
-                  className={`px-2.5 py-1 text-[11px] rounded border transition-colors whitespace-nowrap cursor-pointer ${
+                  className={`px-2.5 py-1 text-[11px] rounded border transition-colors whitespace-nowrap cursor-pointer shrink-0 ${
                     currentPageIndex === idx
                       ? 'bg-ink-900 text-white font-bold border-ink-900 shadow-2xs'
                       : 'bg-white text-charcoal-muted border-line-border hover:text-charcoal hover:border-charcoal'
@@ -691,7 +692,7 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
                   <button
                     key={up.id}
                     onClick={() => setCurrentPageIndex(pageNum)}
-                    className={`px-2.5 py-1 text-[11px] rounded border transition-colors whitespace-nowrap cursor-pointer ${
+                    className={`px-2.5 py-1 text-[11px] rounded border transition-colors whitespace-nowrap cursor-pointer shrink-0 ${
                       currentPageIndex === pageNum
                         ? 'bg-accent text-white font-bold border-accent shadow-2xs'
                         : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
@@ -706,11 +707,11 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
               {/* Add New Blank Page Button */}
               <button
                 onClick={handleAddBlankPage}
-                className="px-3 py-1 bg-accent hover:bg-accent/90 text-white font-bold text-[11px] rounded flex items-center gap-1 transition-colors shadow-2xs shrink-0 ml-1 cursor-pointer"
+                className="px-2.5 sm:px-3 py-1 bg-accent hover:bg-accent/90 text-white font-bold text-[11px] rounded flex items-center gap-1 transition-colors shadow-2xs shrink-0 ml-1 cursor-pointer"
                 title="Add a new blank scratchpad page to type and sketch with Excalidraw-like whiteboard tools"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>+ Add Blank Page</span>
+                <span className="hidden xs:inline">+ Add Blank Page</span>
               </button>
             </div>
           </div>
@@ -720,12 +721,12 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
           isCustomBlankPage
             ? 'p-0 bg-transparent border-none shadow-none space-y-0'
             : notebookTheme === 'ruled'
-            ? `notebook-ruled-page p-6 sm:p-10 border border-stone-300 shadow-xl pl-10 sm:pl-20 rounded-xs space-y-8 ${getNoteFontClass()}`
+            ? `notebook-ruled-page p-3.5 sm:p-10 border border-stone-300 shadow-xl pl-7 sm:pl-20 rounded-xs space-y-6 sm:space-y-8 ${getNoteFontClass()}`
             : notebookTheme === 'grid'
-            ? `notebook-grid-page p-6 sm:p-10 border border-blue-200 shadow-xl pl-6 sm:pl-10 rounded-xs space-y-8 ${getNoteFontClass()}`
+            ? `notebook-grid-page p-3.5 sm:p-10 border border-blue-200 shadow-xl pl-4 sm:pl-10 rounded-xs space-y-6 sm:space-y-8 ${getNoteFontClass()}`
             : notebookTheme === 'yellow'
-            ? `notebook-legal-pad p-6 sm:p-10 border border-amber-300 shadow-xl pl-10 sm:pl-20 rounded-xs space-y-8 ${getNoteFontClass()}`
-            : `space-y-8 ${getNoteFontClass()}`
+            ? `notebook-legal-pad p-3.5 sm:p-10 border border-amber-300 shadow-xl pl-7 sm:pl-20 rounded-xs space-y-6 sm:space-y-8 ${getNoteFontClass()}`
+            : `space-y-6 sm:space-y-8 ${getNoteFontClass()}`
         }`}>
 
           {/* Excalidraw-style Whiteboard Canvas Overlay */}

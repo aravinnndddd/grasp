@@ -91,34 +91,34 @@ export const GroqSettingsModal: React.FC<GroqSettingsModalProps> = ({ isOpen, on
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/60 backdrop-blur-sm animate-fade-in font-sans">
-      <div className="bg-paper-light border border-hairline rounded-none shadow-2xl max-w-lg w-full overflow-hidden text-charcoal">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-charcoal/60 backdrop-blur-sm animate-fade-in font-sans">
+      <div className="bg-paper-light border border-hairline rounded-none shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden text-charcoal">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-hairline flex items-center justify-between bg-paper">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-hairline flex items-center justify-between bg-paper shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-none border border-accent/40 bg-accent/10 flex items-center justify-center text-accent">
+            <div className="w-8 h-8 rounded-none border border-accent/40 bg-accent/10 flex items-center justify-center text-accent shrink-0">
               <Zap className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="font-mono text-sm uppercase tracking-wider font-semibold text-charcoal">
-                AI Provider & Free Model Configuration
+              <h2 className="font-mono text-xs sm:text-sm uppercase tracking-wider font-semibold text-charcoal">
+                AI Provider &amp; Model Configuration
               </h2>
-              <p className="text-[11px] text-charcoal-muted">
+              <p className="text-[10px] sm:text-[11px] text-charcoal-muted">
                 JEV Cognitive Router • Strictly Using Free Models
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-paper-dark text-charcoal-muted hover:text-charcoal transition-colors"
+            className="p-1 hover:bg-paper-dark text-charcoal-muted hover:text-charcoal transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto font-mono text-xs">
+        <div className="p-4 sm:p-6 space-y-5 overflow-y-auto font-mono text-xs">
           
           {/* Free Models Notice */}
           <div className="p-3 bg-emerald-50/70 border border-emerald-300 text-emerald-900 space-y-1">
