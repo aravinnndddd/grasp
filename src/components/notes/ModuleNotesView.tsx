@@ -364,7 +364,7 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
 
   // User-Imported GitHub Repositories chapter pages
   const ghRepoPageConfigs = importedGhRepos.flatMap(repo => 
-    repo.chapters.map((ch, idx) => ({
+    repo.chapters.map((ch: any, idx: number) => ({
       id: `gh_${repo.id}_${ch.id}`,
       title: `${repo.repo}: ${ch.title}`,
       subtitle: `Imported GitHub Notes (${repo.owner}/${repo.repo})`,
@@ -968,7 +968,7 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
                     <span>GeeksforGeeks Recommended Articles:</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {aiResult.gfgLinks.map((g, i) => (
+                    {aiResult.gfgLinks.map((g: any, i: number) => (
                       <a
                         key={i}
                         href={g.url}
@@ -1597,7 +1597,7 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
                           <span className="text-[10px] text-charcoal-muted uppercase font-bold flex items-center gap-1">
                             <ExternalLink className="w-3 h-3 text-emerald-600" /> GeeksforGeeks Links:
                           </span>
-                          {ans.gfgLinks.map((g, gi) => (
+                          {ans.gfgLinks.map((g: any, gi: number) => (
                             <a
                               key={gi}
                               href={g.url}
@@ -1710,7 +1710,7 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
                   return n.title.toLowerCase().includes(q) ||
                     n.fileName.toLowerCase().includes(q) ||
                     (n.author && n.author.toLowerCase().includes(q)) ||
-                    n.tags.some(t => t.toLowerCase().includes(q));
+                    n.tags.some((t: string) => t.toLowerCase().includes(q));
                 }
 
                 return true;
@@ -1790,7 +1790,7 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
                           {/* Tags */}
                           {note.tags && note.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 text-[10px]">
-                              {note.tags.slice(0, 3).map((t, ti) => (
+                              {note.tags.slice(0, 3).map((t: string, ti: number) => (
                                 <span key={ti} className="bg-paper text-charcoal-muted px-1.5 py-0.2 border border-hairline/60">
                                   #{t}
                                 </span>
@@ -1870,8 +1870,8 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
         )}
 
         {/* SECTION 9.5: USER-IMPORTED GITHUB REPOSITORY CHAPTER PAGES */}
-        {importedGhRepos.map((repo) => {
-          return repo.chapters.map((ch, chIdx) => {
+        {importedGhRepos.map((repo: any) => {
+          return repo.chapters.map((ch: any, chIdx: number) => {
             const targetPageIdx = defaultPageConfigs.findIndex(cfg => cfg.id === `gh_${repo.id}_${ch.id}`);
             const isCurrentPage = viewMode === 'page' && currentPageIndex === targetPageIdx;
             const shouldRenderInScroll = viewMode === 'scroll' && (activeTab === 'all' || activeTab === 'references');
