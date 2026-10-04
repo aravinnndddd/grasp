@@ -1,0 +1,168 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --paper-bg: #FBFBF9;
+    --paper-card: #FFFFFF;
+    --paper-subtle: #F5F4EE;
+    --ink-main: #18181B;
+    --ink-muted: #52525B;
+    --ink-faint: #A1A1AA;
+    --line-border: #E4E1D8;
+    --accent-terra: #C2410C;
+    --accent-blue: #0369A1;
+  }
+
+  body {
+    background-color: var(--paper-bg);
+    color: var(--ink-main);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Notebook marginal line style */
+  .paper-grid {
+    background-size: 24px 24px;
+    background-image: 
+      linear-gradient(to right, rgba(228, 225, 216, 0.4) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(228, 225, 216, 0.4) 1px, transparent 1px);
+  }
+
+  .paper-lines {
+    background-size: 100% 28px;
+    background-image: linear-gradient(to bottom, rgba(228, 225, 216, 0.6) 1px, transparent 1px);
+  }
+}
+
+/* Explicit solid color utilities for notebook components */
+.bg-paper { background-color: #FBFBF9 !important; }
+.bg-paper-light { background-color: #FFFFFF !important; }
+.bg-paper-dark { background-color: #F5F4EE !important; }
+.border-hairline { border-color: #E4E1D8 !important; }
+.text-charcoal { color: #18181B !important; }
+.text-charcoal-muted { color: #71717A !important; }
+.text-accent { color: #C2410C !important; }
+.bg-accent { background-color: #C2410C !important; }
+.border-accent { border-color: #C2410C !important; }
+
+/* Custom editorial typography utility classes */
+.font-serif-heading {
+  font-family: 'Instrument Serif', Georgia, serif;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.font-handwriting {
+  font-family: 'Caveat', 'Kalam', cursive;
+}
+
+/* Authentic Topper's Ruled Notebook Page */
+.notebook-ruled-page {
+  background-color: #FDFCF7;
+  background-image: 
+    /* Red double margin lines on the left */
+    linear-gradient(to right, transparent 58px, rgba(239, 68, 68, 0.45) 59px, transparent 60px, transparent 63px, rgba(239, 68, 68, 0.3) 64px, transparent 65px),
+    /* Light blue horizontal ruled lines every 28px */
+    repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(147, 197, 253, 0.4) 28px);
+  background-attachment: local;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 10px 25px -5px rgba(0, 0, 0, 0.08),
+    inset 0 0 100px rgba(245, 239, 225, 0.4);
+}
+
+/* Engineering Graph / Grid Paper */
+.notebook-grid-page {
+  background-color: #F8FAFC;
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(147, 197, 253, 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(147, 197, 253, 0.35) 1px, transparent 1px);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 10px 25px -5px rgba(0, 0, 0, 0.08),
+    inset 0 0 80px rgba(226, 232, 240, 0.5);
+}
+
+/* Yellow Revision Legal Pad */
+.notebook-legal-pad {
+  background-color: #FEF9C3;
+  background-image: 
+    linear-gradient(to right, transparent 58px, rgba(239, 68, 68, 0.45) 59px, transparent 60px, transparent 63px, rgba(239, 68, 68, 0.3) 64px, transparent 65px),
+    repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(217, 119, 6, 0.25) 28px);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 10px 25px -5px rgba(0, 0, 0, 0.08),
+    inset 0 0 80px rgba(254, 240, 138, 0.5);
+}
+
+/* Dark Blueprint Grid */
+.notebook-blueprint {
+  background-color: #0F172A;
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(56, 189, 248, 0.15) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(56, 189, 248, 0.15) 1px, transparent 1px);
+}
+
+/* Spiral Wire Binding Simulation */
+.spiral-binder {
+  background-image: radial-gradient(circle, #333333 35%, #555555 45%, transparent 50%);
+  background-size: 16px 36px;
+  background-repeat: repeat-y;
+  background-position: center;
+}
+
+/* Sticky Post-it Notes */
+.sticky-note-yellow {
+  background: linear-gradient(135deg, #FEF08A 0%, #FDE047 100%);
+  box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.12), inset 0 -2px 5px rgba(0, 0, 0, 0.04);
+}
+
+.sticky-note-pink {
+  background: linear-gradient(135deg, #FBCFE8 0%, #F472B6 100%);
+  box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.sticky-note-cyan {
+  background: linear-gradient(135deg, #CFFAFE 0%, #67E8F9 100%);
+  box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* Authentic Marker Highlights */
+.marker-yellow {
+  background: linear-gradient(104deg, rgba(254, 240, 138, 0.95) 0.9%, rgba(253, 224, 71, 0.85) 98.4%);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.marker-green {
+  background: linear-gradient(104deg, rgba(187, 247, 208, 0.95) 0.9%, rgba(134, 239, 172, 0.85) 98.4%);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.marker-pink {
+  background: linear-gradient(104deg, rgba(251, 207, 232, 0.95) 0.9%, rgba(244, 114, 182, 0.75) 98.4%);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* Custom technical scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F5F4EE;
+}
+::-webkit-scrollbar-thumb {
+  background: #D8D4C8;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A49F96;
+}
