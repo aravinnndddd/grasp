@@ -39,7 +39,9 @@ import {
   LayoutList,
   PanelLeft,
   PanelLeftClose,
-  Github
+  Github,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { NotebookSidebar } from './NotebookSidebar';
 import { moduleNotesDatabase, SubjectNotes, ModuleNoteItem } from '../../data/notes/module-notes-db';
@@ -130,6 +132,7 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
   // Fullscreen Study Mode & Collapsible Sidebar
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [isFsToolbarHidden, setIsFsToolbarHidden] = useState<boolean>(false);
 
   // Excalidraw-style Whiteboard & Annotation Toolkit State
   const [isDrawingEnabled, setIsDrawingEnabled] = useState<boolean>(false);
@@ -173,6 +176,8 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
       setIsFullscreen(isFs);
       if (isFs) {
         setIsSidebarOpen(false);
+      } else {
+        setIsFsToolbarHidden(false);
       }
     };
     document.addEventListener('fullscreenchange', handleFsChange);
@@ -186,11 +191,13 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
       }
       setIsFullscreen(true);
       setIsSidebarOpen(false);
+      setIsFsToolbarHidden(false);
     } else {
       if (document.exitFullscreen && document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
       }
       setIsFullscreen(false);
+      setIsFsToolbarHidden(false);
     }
   };
 
@@ -551,7 +558,19 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
       )}
 
       {/* Fullscreen Floating Controls Bar: ONLY tools and next button! */}
-      {isFullscreen && (
+      {isFullscreen && isFsToolbarHidden && (
+        <button
+          onClick={() => setIsFsToolbarHidden(false)}
+          className="fixed top-2.5 left-1/2 -translate-x-1/2 z-50 bg-ink-900/90 hover:bg-black text-white px-3.5 py-1.5 rounded-full text-xs font-mono flex items-center gap-2 shadow-2xl backdrop-blur-md transition-all hover:scale-105 cursor-pointer opacity-75 hover:opacity-100 animate-fade-in border border-white/20"
+          title="Show Fullscreen Toolbar (Click to reveal)"
+        >
+          <Eye className="w-3.5 h-3.5 text-accent" />
+          <span className="text-[11px] font-bold">Show Toolbar</span>
+          <ChevronDown className="w-3 h-3 text-ink-300" />
+        </button>
+      )}
+
+      {isFullscreen && !isFsToolbarHidden && (
         <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-white/95 backdrop-blur-md border border-charcoal/20 rounded-lg shadow-xl px-3 py-1.5 flex items-center gap-2 max-w-[95vw] overflow-x-auto animate-fade-in">
           {/* Small discreet sidebar trigger */}
           <button
@@ -620,10 +639,22 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
             </button>
           )}
 
+          <div className="w-[1px] h-4 bg-line-border" />
+
+          {/* Hide Toolbar Button (Focus Mode) */}
+          <button
+            onClick={() => setIsFsToolbarHidden(true)}
+            className="p-1.5 text-charcoal-muted hover:text-charcoal hover:bg-paper-200 rounded transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-mono"
+            title="Hide Toolbar (Focus Mode)"
+          >
+            <EyeOff className="w-4 h-4" />
+            <span className="hidden md:inline text-[10px]">Hide</span>
+          </button>
+
           {/* Exit Fullscreen button */}
           <button
             onClick={toggleFullscreen}
-            className="p-1.5 text-charcoal-muted hover:text-rose-600 hover:bg-paper-200 rounded transition-colors ml-1 cursor-pointer"
+            className="p-1.5 text-charcoal-muted hover:text-rose-600 hover:bg-paper-200 rounded transition-colors ml-0.5 cursor-pointer"
             title="Exit Fullscreen (Esc)"
           >
             <Minimize2 className="w-4 h-4" />
