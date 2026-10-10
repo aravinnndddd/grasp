@@ -5,8 +5,8 @@ import { ktuS5CseCurriculum } from '../../data/ktu-s5-cse';
 import { GroqClient } from '../../lib/ai/groq-client';
 
 interface HeaderNavProps {
-  currentTab: 'HOME' | 'NOTES' | 'PRACTICE' | 'EXAM';
-  onSelectTab: (tab: 'HOME' | 'NOTES' | 'PRACTICE' | 'EXAM') => void;
+  currentTab: 'HOME' | 'NOTES' | 'UPLOADED' | 'PRACTICE' | 'EXAM';
+  onSelectTab: (tab: 'HOME' | 'NOTES' | 'UPLOADED' | 'PRACTICE' | 'EXAM') => void;
   currentConcept: ConceptDetail;
   currentSubjectId: string;
   onSelectSubject: (subjectId: string) => void;
@@ -29,9 +29,10 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   isTutorOpen,
   masteryPercentage
 }) => {
-  const tabs: Array<{ id: 'HOME' | 'NOTES' | 'PRACTICE' | 'EXAM'; label: string }> = [
+  const tabs: Array<{ id: 'HOME' | 'NOTES' | 'UPLOADED' | 'PRACTICE' | 'EXAM'; label: string }> = [
     { id: 'HOME', label: 'HOME' },
     { id: 'NOTES', label: 'NOTES' },
+    { id: 'UPLOADED', label: 'VAULT (RAG)' },
     { id: 'PRACTICE', label: 'PRACTICE' },
     { id: 'EXAM', label: 'EXAM QS' },
   ];
@@ -137,8 +138,8 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         </div>
       </div>
 
-      {/* Mobile Sub-Navigation Bar (Sticky 4-tab bar on mobile) */}
-      <nav className="md:hidden border-t border-line-border/70 bg-paper-100 grid grid-cols-4 px-2 py-1 gap-1">
+      {/* Mobile Sub-Navigation Bar (Sticky 5-tab bar on mobile) */}
+      <nav className="md:hidden border-t border-line-border/70 bg-paper-100 grid grid-cols-5 px-1 py-1 gap-1">
         {tabs.map((tab) => (
           <button
             key={tab.id}

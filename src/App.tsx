@@ -12,6 +12,7 @@ import { KnowledgeSearchModal } from './components/search/KnowledgeSearchModal';
 import { GroqSettingsModal } from './components/ai/GroqSettingsModal';
 import { HeroSection } from './components/home/HeroSection';
 import { GitHubRepoImporterModal } from './components/notes/GitHubRepoImporterModal';
+import { UploadedNotesVaultView } from './components/notes/UploadedNotesVaultView';
 
 const INITIAL_PROFILE: StudentProfile = {
   name: 'Aravind',
@@ -74,7 +75,7 @@ const SUBJECT_PRIMARY_CONCEPT: Record<string, string> = {
 };
 
 export const App: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState<'HOME' | 'NOTES' | 'PRACTICE' | 'EXAM'>('HOME');
+  const [currentTab, setCurrentTab] = useState<'HOME' | 'NOTES' | 'UPLOADED' | 'PRACTICE' | 'EXAM'>('HOME');
   const [currentSubjectId, setCurrentSubjectId] = useState<string>('pccst501');
   const [currentConceptId, setCurrentConceptId] = useState<string>('tcp-congestion-control');
   const [isTutorOpen, setIsTutorOpen] = useState<boolean>(false);
@@ -193,6 +194,13 @@ export const App: React.FC = () => {
             onOpenGroqSettings={() => setIsGroqSettingsOpen(true)}
             onSelectSubject={handleSelectSubject}
             onOpenGhImporter={() => setIsGhImportModalOpen(true)}
+          />
+        )}
+
+        {currentTab === 'UPLOADED' && (
+          <UploadedNotesVaultView
+            currentSubjectId={currentSubjectId}
+            onOpenGroqSettings={() => setIsGroqSettingsOpen(true)}
           />
         )}
 

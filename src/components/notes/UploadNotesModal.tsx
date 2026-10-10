@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { UploadedNotesStorage, UploadedNote } from '../../lib/storage/uploaded-notes';
 import { GroqClient } from '../../lib/ai/groq-client';
+import { PdfRagEngine, PdfRagIndex } from '../../lib/rag/pdf-rag-engine';
 
 interface UploadNotesModalProps {
   isOpen: boolean;
@@ -116,6 +117,8 @@ export const UploadNotesModal: React.FC<UploadNotesModalProps> = ({
   const [editableTitle, setEditableTitle] = useState('');
   const [textMode, setTextMode] = useState(false);
   const [pastedText, setPastedText] = useState('');
+  const [ragProgress, setRagProgress] = useState<{ message: string; percent: number }>({ message: '', percent: 0 });
+  const [ragStats, setRagStats] = useState<{ totalPages: number; totalChunks: number } | null>(null);
 
   if (!isOpen) return null;
 
@@ -130,6 +133,8 @@ export const UploadNotesModal: React.FC<UploadNotesModalProps> = ({
     setPastedText('');
     setTextMode(false);
     setIsDragging(false);
+    setRagProgress({ message: '', percent: 0 });
+    setRagStats(null);
   };
 
   const getExt = (name: string) => name.split('.').pop()?.toLowerCase() || '';
@@ -146,37 +151,103 @@ export const UploadNotesModal: React.FC<UploadNotesModalProps> = ({
 
       if (['txt', 'md', 'markdown'].includes(ext)) {
         text = await readFileAsText(file);
-      } else {
-        // PDF / image — read as dataUrl for display, text will be filename-based
+        setFileDataUrl('');
+        setRawText(text);
+
+        if (!GroqClient.isConfigured()) {
+          const fallback: DetectedMeta = {
+            title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
+            subject: 'General Study Material',
+            subjectCode: 'GEN',
+            moduleNum: 0,
+            category: 'lecture_notes',
+            tags: [ext.toUpperCase(), 'uploaded'],
+            summary: text.slice(0, 2000) || `# ${file.name}\n\nDocument uploaded.`
+          };
+          setMeta(fallback);
+          setEditableTitle(fallback.title);
+          setStep('preview');
+          return;
+        }
+
+        const analysed = await analyseWithAI(text);
+        setMeta(analysed);
+        setEditableTitle(analysed.title);
+        setStep('preview');
+      } else if (ext === 'pdf') {
+        // --- 100+ Page PDF RAG Pipeline ---
         dataUrl = await readFileAsDataUrl(file);
-        // For PDFs we pass the filename + any embedded metadata as the text hint
-        text = `File: ${file.name}\nType: ${ext.toUpperCase()}\nSize: ${(file.size / 1024).toFixed(1)} KB\nPlease analyse based on the filename and generate comprehensive notes about the likely topic.`;
-      }
+        setFileDataUrl(dataUrl);
 
-      setFileDataUrl(dataUrl);
-      setRawText(text);
+        setRagProgress({ message: 'Initializing client-side RAG pipeline…', percent: 5 });
 
-      if (!GroqClient.isConfigured()) {
-        // No AI key — use filename as fallback meta
-        const fallback: DetectedMeta = {
-          title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
-          subject: 'General Study Material',
-          subjectCode: 'GEN',
+        // Step 1: Extract all pages and construct semantic BM25 RAG index
+        const ragIndex = await PdfRagEngine.buildIndexFromPdf(file, (msg, pct) => {
+          setRagProgress({ message: msg, percent: pct });
+        });
+
+        setRagStats({ totalPages: ragIndex.totalPages, totalChunks: ragIndex.totalChunks });
+
+        // Extract raw text for fallback/search storage
+        const combinedText = ragIndex.chunks.map(c => `[Page ${c.pageNumber}]: ${c.content}`).join('\n\n');
+        setRawText(combinedText);
+
+        if (!GroqClient.isConfigured()) {
+          const fallback: DetectedMeta = {
+            title: ragIndex.documentTitle,
+            subject: 'Engineering Study Material',
+            subjectCode: 'KTU',
+            moduleNum: 0,
+            category: 'lecture_notes',
+            tags: ['PDF', `${ragIndex.totalPages} Pages`, `${ragIndex.totalChunks} Chunks`, 'RAG-Ready'],
+            summary: `# 📚 ${ragIndex.documentTitle}\n\n> **RAG Index Ready:** ${ragIndex.totalPages} Pages indexed into ${ragIndex.totalChunks} semantic passages.\n> *Configure your Groq / OpenRouter API Key in AI Settings to generate deep multi-module syllabus notes across all ${ragIndex.totalPages} pages.*`
+          };
+          setMeta(fallback);
+          setEditableTitle(fallback.title);
+          setStep('preview');
+          return;
+        }
+
+        // Step 2: Use RAG to generate comprehensive notes for all pages & modules
+        setRagProgress({ message: `Generating comprehensive notes for ${ragIndex.totalPages} pages with RAG…`, percent: 75 });
+
+        const { notes, topicBreakdown } = await PdfRagEngine.generateComprehensiveNotes(ragIndex, (status, pct) => {
+          setRagProgress({ message: status, percent: pct });
+        });
+
+        const detectedMeta: DetectedMeta = {
+          title: ragIndex.documentTitle,
+          subject: 'Comprehensive Engineering Courseware',
+          subjectCode: 'KTU',
           moduleNum: 0,
           category: 'lecture_notes',
-          tags: [ext.toUpperCase(), 'uploaded'],
-          summary: text.slice(0, 2000) || `# ${file.name}\n\nPDF uploaded. Open it below to view.`
+          tags: ['RAG-Grounding', `${ragIndex.totalPages} Pages`, `${topicBreakdown.length} Modules`, 'KTU-Exam-Ready'],
+          summary: notes
+        };
+
+        setMeta(detectedMeta);
+        setEditableTitle(detectedMeta.title);
+        setStep('preview');
+      } else {
+        // Image or other files
+        dataUrl = await readFileAsDataUrl(file);
+        text = `File: ${file.name}\nType: ${ext.toUpperCase()}\nSize: ${(file.size / 1024).toFixed(1)} KB`;
+        setFileDataUrl(dataUrl);
+        setRawText(text);
+
+        const fallback: DetectedMeta = {
+          title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
+          subject: 'Uploaded Media',
+          subjectCode: 'GEN',
+          moduleNum: 0,
+          category: 'handwritten_scans',
+          tags: [ext.toUpperCase(), 'media'],
+          summary: `# ${file.name}\n\nMedia uploaded successfully.`
         };
         setMeta(fallback);
         setEditableTitle(fallback.title);
         setStep('preview');
-        return;
       }
-
-      const analysed = await analyseWithAI(text);
-      setMeta(analysed);
-      setEditableTitle(analysed.title);
-      setStep('preview');
     } catch (err: any) {
       setError(err.message || 'Analysis failed. You can still save the file manually.');
       setStep('drop');
@@ -386,27 +457,49 @@ export const UploadNotesModal: React.FC<UploadNotesModalProps> = ({
 
           {/* ── STEP: analysing ── */}
           {step === 'analysing' && (
-            <div className="flex flex-col items-center justify-center py-16 px-6 gap-5 text-center">
+            <div className="flex flex-col items-center justify-center py-12 px-6 gap-5 text-center">
               <div className="relative w-16 h-16">
                 <div className="absolute inset-0 rounded-full border-4 border-terracotta/20 animate-ping" />
                 <div className="w-16 h-16 rounded-full bg-terracotta/10 border-2 border-terracotta flex items-center justify-center">
                   <Brain className="w-7 h-7 text-terracotta animate-pulse" />
                 </div>
               </div>
-              <div>
-                <div className="text-sm font-bold text-ink-900 font-serif-heading">AI is reading your document…</div>
-                <div className="text-xs text-ink-500 font-mono-code mt-1">
-                  Detecting subject · Extracting concepts · Generating structured notes
+              
+              <div className="space-y-1 max-w-md">
+                <div className="text-sm font-bold text-ink-900 font-serif-heading">
+                  RAG Pipeline Active: Processing Document…
+                </div>
+                <div className="text-xs text-ink-600 font-mono-code min-h-[36px] flex items-center justify-center">
+                  {ragProgress.message || 'Extracting pages · Indexing BM25 tokens · Synthesizing grounded study notes'}
                 </div>
               </div>
-              <div className="flex gap-1.5 mt-2">
-                {['Analysing content', 'Detecting topic', 'Building notes'].map((label, i) => (
+
+              {/* Live progress percentage bar */}
+              <div className="w-full max-w-sm space-y-1">
+                <div className="flex justify-between text-[11px] font-mono-code text-ink-500">
+                  <span>Progress</span>
+                  <span className="font-bold text-terracotta">{ragProgress.percent}%</span>
+                </div>
+                <div className="h-2 w-full bg-paper-200 rounded-full overflow-hidden border border-line-border">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-500 to-terracotta transition-all duration-300 rounded-full"
+                    style={{ width: `${Math.max(5, ragProgress.percent)}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                {[
+                  '100+ Pages Supported',
+                  'Client-side PDF Extraction',
+                  'BM25 Semantic Retrieval',
+                  'Grounded Citations'
+                ].map((label, i) => (
                   <span
                     key={i}
-                    className="px-2.5 py-1 bg-paper-100 border border-line-border rounded-full text-[10px] font-mono-code text-ink-600 animate-pulse"
-                    style={{ animationDelay: `${i * 300}ms` }}
+                    className="px-2.5 py-0.5 bg-paper-100 border border-line-border rounded-full text-[10px] font-mono-code text-ink-600"
                   >
-                    {label}
+                    ✓ {label}
                   </span>
                 ))}
               </div>
@@ -425,8 +518,15 @@ export const UploadNotesModal: React.FC<UploadNotesModalProps> = ({
 
               {/* Detected badges */}
               <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-                <div className="flex items-center gap-1.5 text-xs font-mono-code font-bold text-emerald-800 mb-2">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> AI Detection Complete
+                <div className="flex items-center justify-between text-xs font-mono-code font-bold text-emerald-800 mb-2">
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> RAG Notes Generation Complete
+                  </span>
+                  {ragStats && (
+                    <span className="text-[10px] bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded border border-emerald-300">
+                      ⚡ {ragStats.totalPages} Pages Grounded · {ragStats.totalChunks} Passages
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2 text-[11px] font-mono-code">
                   <span className="px-2 py-0.5 bg-white border border-emerald-200 rounded-full text-ink-700">

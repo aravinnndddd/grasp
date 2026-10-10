@@ -79,8 +79,8 @@ export const WhiteboardToolbar: React.FC<WhiteboardToolbarProps> = ({
           {/* Tool selectors */}
           {[
             { id: 'select' as WhiteboardTool, icon: MousePointer, title: 'Select / Pointer' },
-            { id: 'pen' as WhiteboardTool, icon: Pen, title: 'Freehand Pen / Pencil' },
-            { id: 'highlighter' as WhiteboardTool, icon: Highlighter, title: 'Fluorescent Marker Highlighter' },
+            { id: 'pen' as WhiteboardTool, icon: Pen, title: 'Smooth Ink Pen (Curved)' },
+            { id: 'highlighter' as WhiteboardTool, icon: Highlighter, title: 'Smooth Fluorescent Highlighter' },
             { id: 'eraser' as WhiteboardTool, icon: Eraser, title: 'Eraser' },
             { id: 'rectangle' as WhiteboardTool, icon: Square, title: 'Rectangle / Box' },
             { id: 'circle' as WhiteboardTool, icon: Circle, title: 'Circle / Ellipse' },

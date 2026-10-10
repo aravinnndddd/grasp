@@ -273,28 +273,51 @@ export class GroqClient {
       }
     }
 
-    let res: Response;
-    try {
-      res = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          model,
-          messages,
-          temperature,
-          max_tokens,
-        }),
-      });
-    } catch (networkErr: any) {
-      throw new Error(`Network connection error: ${networkErr?.message || 'Failed to reach AI endpoint'}. Check your internet connection or proxy.`);
+    let res: Response | null = null;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      attempts++;
+      try {
+        res = await fetch(endpoint, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            model,
+            messages,
+            temperature,
+            max_tokens,
+          }),
+        });
+      } catch (networkErr: any) {
+        if (attempts >= maxAttempts) {
+          throw new Error(`Network connection error: ${networkErr?.message || 'Failed to reach AI endpoint'}. Check your internet connection or proxy.`);
+        }
+        await new Promise(r => setTimeout(r, 2000));
+        continue;
+      }
+
+      if (res.status === 429) {
+        // Rate limit reached - wait and retry if attempts remain
+        if (attempts < maxAttempts) {
+          const retryAfterSec = parseInt(res.headers.get('retry-after') || '0', 10);
+          const waitMs = retryAfterSec > 0 ? (retryAfterSec + 1) * 1000 : (attempts * 4500);
+          console.warn(`[GroqClient] 429 Rate limit hit. Backing off for ${waitMs}ms before attempt ${attempts + 1}/${maxAttempts}...`);
+          await new Promise(r => setTimeout(r, waitMs));
+          continue;
+        }
+      }
+
+      break;
     }
 
-    if (!res.ok) {
-      const errJson = await res.json().catch(() => ({}));
-      const errMsg = errJson?.error?.message || `API HTTP ${res.status}: ${res.statusText}`;
+    if (!res || !res.ok) {
+      const errJson = res ? await res.json().catch(() => ({})) : {};
+      const errMsg = errJson?.error?.message || (res ? `API HTTP ${res.status}: ${res.statusText}` : 'Request failed');
 
       // Helpful context if authentication failed
-      if (res.status === 401 || errMsg.toLowerCase().includes('authentication') || errMsg.toLowerCase().includes('unauthorized')) {
+      if (res && (res.status === 401 || errMsg.toLowerCase().includes('authentication') || errMsg.toLowerCase().includes('unauthorized'))) {
         if (endpoint.includes('openrouter.ai') && apiKey.startsWith('gsk_')) {
           throw new Error('Authentication Error: You entered a Groq API key (starts with "gsk_"), but the endpoint was set to OpenRouter. Click "Groq Cloud" in settings to auto-fix.');
         }
@@ -302,6 +325,10 @@ export class GroqClient {
           throw new Error('Authentication Error: You entered an OpenRouter key (starts with "sk-or-"), but the endpoint was set to Groq. Click "OpenRouter" in settings to auto-fix.');
         }
         throw new Error(`Authentication Error: ${errMsg}. Please check your API key in AI Settings.`);
+      }
+
+      if (res && res.status === 429) {
+        throw new Error(`AI Rate Limit Exceeded (429): Free tier limits reached. Please wait a moment or synthesize one module at a time. ${errMsg}`);
       }
 
       throw new Error(errMsg);

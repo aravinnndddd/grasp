@@ -73,11 +73,40 @@ export const UploadedNoteViewerModal: React.FC<UploadedNoteViewerModalProps> = (
     setActiveTab('ai_chat');
 
     try {
-      const noteContext = note.content 
-        ? `Context from Uploaded Student Note (${note.title}):\n"""\n${note.content.slice(0, 3000)}\n"""\n\n`
-        : `Context: Student uploaded note for ${note.subjectCode} titled "${note.title}".\n\n`;
+      // RAG Passage Retrieval across all pages
+      let noteContext = '';
+      if (note.content && note.content.length > 3000) {
+        // Split content into page-referenced passages
+        const passages = note.content.split(/(?=\[Page\s+\d+\])/i);
+        const queryWords = query.toLowerCase().replace(/[^a-z0-9]/g, ' ').split(/\s+/).filter(w => w.length > 2);
+        
+        // Score passages by keyword relevance
+        const scored = passages.map(p => {
+          const lower = p.toLowerCase();
+          let score = 0;
+          for (const w of queryWords) {
+            if (lower.includes(w)) score += 1;
+          }
+          return { passage: p.trim(), score };
+        });
 
-      const fullPrompt = `${noteContext}Student Query about this note:\n${query}`;
+        scored.sort((a, b) => b.score - a.score);
+        const topPassages = scored.filter(s => s.score > 0).slice(0, 5).map(s => s.passage);
+
+        if (topPassages.length > 0) {
+          noteContext = `RAG Retrieved Excerpts from ${note.title} (Pages matched for query):\n"""\n${topPassages.join('\n\n---\n\n')}\n"""\n\n`;
+        } else {
+          noteContext = `Context from Uploaded Note (${note.title}):\n"""\n${note.content.slice(0, 4000)}\n"""\n\n`;
+        }
+      } else if (note.content) {
+        noteContext = `Context from Uploaded Note (${note.title}):\n"""\n${note.content}\n"""\n\n`;
+      } else if (note.aiSummary) {
+        noteContext = `Context from Study Guide (${note.title}):\n"""\n${note.aiSummary.slice(0, 4000)}\n"""\n\n`;
+      } else {
+        noteContext = `Context: Student uploaded note for ${note.subjectCode} titled "${note.title}".\n\n`;
+      }
+
+      const fullPrompt = `${noteContext}Student Query (Cite page numbers if available):\n${query}`;
 
       const res = await JevCognitiveRouter.executeQuery(fullPrompt, {
         subjectCode: note.subjectCode,

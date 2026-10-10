@@ -19,8 +19,8 @@ import { ktuS5CseCurriculum } from '../../data/ktu-s5-cse';
 interface HeroSectionProps {
   currentSubjectId: string;
   onSelectSubject: (subjectId: string) => void;
-  currentTab?: 'HOME' | 'NOTES' | 'PRACTICE' | 'EXAM';
-  onNavigateTab: (tab: 'HOME' | 'NOTES' | 'PRACTICE' | 'EXAM') => void;
+  currentTab?: 'HOME' | 'NOTES' | 'UPLOADED' | 'PRACTICE' | 'EXAM';
+  onNavigateTab: (tab: 'HOME' | 'NOTES' | 'UPLOADED' | 'PRACTICE' | 'EXAM') => void;
   onOpenGhImporter?: () => void;
 }
 

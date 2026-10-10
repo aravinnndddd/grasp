@@ -176,13 +176,27 @@ export const ModuleNotesView: React.FC<ModuleNotesViewProps> = ({
       setIsFullscreen(isFs);
       if (isFs) {
         setIsSidebarOpen(false);
+        setIsFsToolbarHidden(false);
       } else {
         setIsFsToolbarHidden(false);
       }
     };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    };
+
     document.addEventListener('fullscreenchange', handleFsChange);
-    return () => document.removeEventListener('fullscreenchange', handleFsChange);
-  }, []);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isFullscreen]);
 
   const toggleFullscreen = () => {
     if (!isFullscreen) {

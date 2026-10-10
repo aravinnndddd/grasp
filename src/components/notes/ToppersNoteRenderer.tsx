@@ -1,6 +1,7 @@
 import React from 'react';
 import { Lightbulb, Info, FileText, CheckCircle2 } from 'lucide-react';
 import { MermaidDiagram } from './MermaidDiagram';
+import katex from 'katex';
 
 interface ToppersNoteRendererProps {
   content: string;
@@ -16,6 +17,7 @@ type Block =
   | { type: 'table'; headers: string[]; rows: string[][] }
   | { type: 'mermaid'; code: string }
   | { type: 'code'; code: string; language?: string }
+  | { type: 'math'; code: string }
   | { type: 'callout'; lines: string[] }
   | { type: 'bullet'; text: string }
   | { type: 'numbered'; num: string; text: string }
@@ -74,14 +76,14 @@ export const ToppersNoteRenderer: React.FC<ToppersNoteRendererProps> = ({
 
           case 'table':
             return (
-              <div key={idx} className="my-3 overflow-x-auto rounded border border-line-border bg-white shadow-2xs">
+              <div key={idx} className="my-3 overflow-x-auto rounded border border-line-border bg-white shadow-2xs max-w-full">
                 <table className="min-w-full divide-y divide-line-border text-left border-collapse">
                   <thead className="bg-paper-dark">
                     <tr>
                       {block.headers.map((h, hIdx) => (
                         <th 
                           key={hIdx} 
-                          className="px-3.5 py-2 font-mono text-[11px] font-bold text-charcoal uppercase tracking-wider border-r border-line-border/60 last:border-r-0"
+                          className="px-3.5 py-2 font-mono text-[11px] font-bold text-charcoal uppercase tracking-wider border-r border-line-border/60 last:border-r-0 whitespace-nowrap"
                         >
                           {renderFormattedInline(h, isDefinition)}
                         </th>
@@ -97,7 +99,7 @@ export const ToppersNoteRenderer: React.FC<ToppersNoteRendererProps> = ({
                         {row.map((cell, cIdx) => (
                           <td 
                             key={cIdx} 
-                            className="px-3.5 py-2 text-xs text-charcoal border-r border-line-border/40 last:border-r-0 leading-relaxed"
+                            className="px-3.5 py-2.5 text-xs text-charcoal border-r border-line-border/40 last:border-r-0 leading-relaxed align-top"
                           >
                             {renderFormattedInline(cell, isDefinition)}
                           </td>
@@ -106,6 +108,23 @@ export const ToppersNoteRenderer: React.FC<ToppersNoteRendererProps> = ({
                     ))}
                   </tbody>
                 </table>
+              </div>
+            );
+
+          case 'math':
+            return (
+              <div key={idx} className="my-3 p-3.5 bg-paper-50/80 border border-blue-200/80 rounded-lg text-center overflow-x-auto shadow-2xs">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: (() => {
+                      try {
+                        return katex.renderToString(block.code, { displayMode: true, throwOnError: false, output: 'htmlAndMathml' });
+                      } catch {
+                        return `<pre class="font-mono text-xs text-blue-900">${block.code}</pre>`;
+                      }
+                    })()
+                  }}
+                />
               </div>
             );
 
@@ -323,9 +342,82 @@ function parseMarkdownBlocks(content: string): Block[] {
       continue;
     }
 
+    // 2.5 LaTeX Display Math Blocks (\[ ... \], $$, or \begin{cases} ... \end{cases})
+    if (trimmed === '\\[' || (trimmed.startsWith('\\[') && !trimmed.endsWith('\\]'))) {
+      const mathLines: string[] = [line.replace(/^\s*\\\[/, '')];
+      i++;
+      while (i < rawLines.length && !rawLines[i].includes('\\]')) {
+        mathLines.push(rawLines[i]);
+        i++;
+      }
+      if (i < rawLines.length && rawLines[i].includes('\\]')) {
+        mathLines.push(rawLines[i].replace(/\\\]\s*$/, ''));
+        i++;
+      }
+      const code = mathLines.join('\n').trim();
+      if (code) {
+        blocks.push({ type: 'math', code });
+      }
+      continue;
+    }
+
+    if (trimmed === '$$' || (trimmed.startsWith('$$') && !trimmed.endsWith('$$') && trimmed.length > 2)) {
+      const mathLines: string[] = [line.replace(/^\s*\$\$/, '')];
+      i++;
+      while (i < rawLines.length && !rawLines[i].includes('$$')) {
+        mathLines.push(rawLines[i]);
+        i++;
+      }
+      if (i < rawLines.length && rawLines[i].includes('$$')) {
+        mathLines.push(rawLines[i].replace(/\$\$\s*$/, ''));
+        i++;
+      }
+      const code = mathLines.join('\n').trim();
+      if (code) {
+        blocks.push({ type: 'math', code });
+      }
+      continue;
+    }
+
+    if (trimmed.startsWith('\\begin{') && !trimmed.includes('\\end{')) {
+      const envMatch = trimmed.match(/^\\begin\{([^}]+)\}/);
+      const endMarker = envMatch ? `\\end{${envMatch[1]}}` : '\\end';
+      const mathLines: string[] = [line];
+      i++;
+      while (i < rawLines.length && !rawLines[i].includes(endMarker)) {
+        mathLines.push(rawLines[i]);
+        i++;
+      }
+      if (i < rawLines.length && rawLines[i].includes(endMarker)) {
+        mathLines.push(rawLines[i]);
+        i++;
+      }
+      blocks.push({ type: 'math', code: mathLines.join('\n').trim() });
+      continue;
+    }
+
+    // Heading lines disguised as bullets (e.g. `• ### KTU Exam Focus:` or `- ### KTU Exam Focus:`)
+    if (/^[-*•]\s*###\s+/.test(trimmed)) {
+      blocks.push({ type: 'h3', text: trimmed.replace(/^[-*•]\s*###\s+/, '') });
+      i++;
+      continue;
+    }
+    if (/^[-*•]\s*##\s+/.test(trimmed)) {
+      blocks.push({ type: 'h2', text: trimmed.replace(/^[-*•]\s*##\s+/, '') });
+      i++;
+      continue;
+    }
+
     // 8. Bullet points
-    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-      blocks.push({ type: 'bullet', text: trimmed.replace(/^[-*]\s+/, '') });
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('• ')) {
+      const bText = trimmed.replace(/^[-*•]\s+/, '');
+      if (bText.startsWith('### ')) {
+        blocks.push({ type: 'h3', text: bText.replace(/^###\s+/, '') });
+      } else if (bText.startsWith('## ')) {
+        blocks.push({ type: 'h2', text: bText.replace(/^##\s+/, '') });
+      } else {
+        blocks.push({ type: 'bullet', text: bText });
+      }
       i++;
       continue;
     }
@@ -395,13 +487,60 @@ function splitTableRow(rowStr: string): string[] {
  * Parses inline tokens: **bold** (highlighter), $math$ (chip), `code` (mono), *italic*, <img ...>, ![alt](url)
  */
 function renderFormattedInline(text: string, isDefinition = false): React.ReactNode[] {
-  const tokenRegex = /(\*\*[^*]+\*\*|\$[^\$]+\$|`[^`]+`|\[[^\]]+\]\([^)]+\)|<img\s+[^>]+>|!\[[^\]]*\]\([^)]+\))/gi;
+  const tokenRegex = /(\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)|\$\$[\s\S]*?\$\$|\$[^$\n]+\$|<br\s*\/?>|\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\)|<img\s+[^>]+>|!\[[^\]]*\]\([^)]+\))/gi;
   const parts = text.split(tokenRegex);
 
   return parts.map((part, index) => {
     if (!part) return null;
 
-    // 1. Bold text (**text**) -> Fluorescent Highlighter Pen
+    // 0. Line break <br> or <br/>
+    if (/^<br\s*\/?>$/i.test(part)) {
+      return <br key={index} className="my-0.5" />;
+    }
+
+    // 1. LaTeX Math Formula Display \[...\] or $$...$$
+    if ((part.startsWith('\\[') && part.endsWith('\\]')) || (part.startsWith('$$') && part.endsWith('$$'))) {
+      const mathInner = part.startsWith('\\[') ? part.slice(2, -2).trim() : part.slice(2, -2).trim();
+      try {
+        const html = katex.renderToString(mathInner, { displayMode: true, throwOnError: false, output: 'htmlAndMathml' });
+        return (
+          <span
+            key={index}
+            className="block my-2 text-center overflow-x-auto"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        );
+      } catch {
+        return (
+          <span key={index} className="font-mono text-[11px] bg-blue-50 text-blue-900 border border-blue-200 px-1.5 py-0.5 rounded mx-0.5 inline-block">
+            {mathInner}
+          </span>
+        );
+      }
+    }
+
+    // 2. LaTeX Math Formula Inline \(...\) or $...$
+    if ((part.startsWith('\\(') && part.endsWith('\\)')) || (part.startsWith('$') && part.endsWith('$'))) {
+      const mathInner = part.startsWith('\\(') ? part.slice(2, -2).trim() : part.slice(1, -1).trim();
+      try {
+        const html = katex.renderToString(mathInner, { displayMode: false, throwOnError: false, output: 'htmlAndMathml' });
+        return (
+          <span
+            key={index}
+            className="inline-block align-middle mx-0.5"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        );
+      } catch {
+        return (
+          <span key={index} className="font-mono text-[11px] bg-blue-50 text-blue-900 border border-blue-200 px-1.5 py-0.5 rounded mx-0.5 inline-block">
+            {mathInner}
+          </span>
+        );
+      }
+    }
+
+    // 3. Bold text (**text**) -> Fluorescent Highlighter Pen
     if (part.startsWith('**') && part.endsWith('**')) {
       const inner = part.slice(2, -2);
       const isHeaderKey = inner.endsWith(':');
@@ -435,19 +574,6 @@ function renderFormattedInline(text: string, isDefinition = false): React.ReactN
           className="marker-yellow text-amber-950 font-bold px-1.5 py-0.5 rounded-[2px] border-b-2 border-amber-300 mx-0.5 inline-block"
         >
           {inner}
-        </span>
-      );
-    }
-
-    // 2. Math Formula ($...$) -> Technical Formula Chip
-    if (part.startsWith('$') && part.endsWith('$')) {
-      const mathInner = part.slice(1, -1);
-      return (
-        <span 
-          key={index}
-          className="font-mono text-[11px] font-semibold bg-blue-50/90 text-blue-900 border border-blue-200/90 px-1.5 py-0.5 rounded mx-0.5 inline-block tracking-tight shadow-2xs"
-        >
-          {mathInner}
         </span>
       );
     }

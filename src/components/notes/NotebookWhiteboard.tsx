@@ -170,14 +170,27 @@ export const NotebookWhiteboard: React.FC<NotebookWhiteboardProps> = ({
         ctx.lineJoin = 'round';
       }
 
-      // Freehand Pen / Highlighter
+      // Freehand Pen / Highlighter with Quadratic Bezier Midpoint Smoothing
       if ((el.type === 'pen' || el.type === 'highlighter') && el.points && el.points.length > 0) {
+        const pts = el.points;
         ctx.beginPath();
-        ctx.moveTo(el.points[0].x, el.points[0].y);
-        for (let i = 1; i < el.points.length; i++) {
-          ctx.lineTo(el.points[i].x, el.points[i].y);
+        ctx.moveTo(pts[0].x, pts[0].y);
+
+        if (pts.length === 1) {
+          ctx.arc(pts[0].x, pts[0].y, Math.max(1, el.width / 2), 0, Math.PI * 2);
+          ctx.fill();
+        } else if (pts.length === 2) {
+          ctx.lineTo(pts[1].x, pts[1].y);
+          ctx.stroke();
+        } else {
+          for (let i = 1; i < pts.length - 1; i++) {
+            const midX = (pts[i].x + pts[i + 1].x) / 2;
+            const midY = (pts[i].y + pts[i + 1].y) / 2;
+            ctx.quadraticCurveTo(pts[i].x, pts[i].y, midX, midY);
+          }
+          ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+          ctx.stroke();
         }
-        ctx.stroke();
       }
 
       // Rectangle
@@ -359,9 +372,15 @@ export const NotebookWhiteboard: React.FC<NotebookWhiteboardProps> = ({
     if (activeTool === 'pen' || activeTool === 'highlighter') {
       setCurrentElement(prev => {
         if (!prev) return null;
+        const pts = prev.points || [];
+        const last = pts[pts.length - 1];
+        // Jitter dampening: ignore micro-movements under 2px for smooth organic curves
+        if (last && Math.hypot(x - last.x, y - last.y) < 2) {
+          return prev;
+        }
         return {
           ...prev,
-          points: [...(prev.points || []), { x, y }]
+          points: [...pts, { x, y }]
         };
       });
     } else {
