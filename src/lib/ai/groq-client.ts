@@ -40,7 +40,7 @@ export const SUPPORTED_FREE_MODELS: FreeModelInfo[] = [
     name: 'qwen/qwen3.8-27b',
     category: 'Alibaba Cloud',
     vendor: 'Alibaba Cloud',
-    description: '27B parameter powerhouse for code generation, algorithm tracing, and structural KTU computer science diagrams.',
+    description: '27B parameter powerhouse for code generation, algorithm tracing, and structural computer science diagrams.',
   },
 
   // --- CANOPY LABS ---
@@ -81,7 +81,7 @@ export const SUPPORTED_FREE_MODELS: FreeModelInfo[] = [
     name: 'openai/gpt-oss-120b',
     category: 'OpenAI',
     vendor: 'OpenAI',
-    description: '120B parameter open-weights flagship. Highest reasoning fidelity, deep mathematical proofs, and exhaustive KTU exam evaluation.',
+    description: '120B parameter open-weights flagship. Highest reasoning fidelity, deep mathematical proofs, and exhaustive conceptual evaluation.',
     isDefault: true
   },
   {
@@ -267,7 +267,7 @@ export class GroqClient {
         headers['HTTP-Referer'] = (typeof window !== 'undefined' && window.location.origin) 
           ? window.location.origin 
           : 'https://grasp-eosin-one.vercel.app';
-        headers['X-Title'] = 'GRASP KTU BTech Learning Laboratory';
+        headers['X-Title'] = 'GRASP AI Notes Studio';
       } catch (e) {
         // ignore
       }

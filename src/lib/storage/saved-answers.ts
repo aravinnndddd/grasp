@@ -72,7 +72,7 @@ export class SavedAnswersStorage {
     const all = this.getAll();
     if (all.length === 0) return '# No saved AI answers found.\n';
 
-    let md = `# GRASP BTech // Saved KTU AI Learning Answers & Notes\n`;
+    let md = `# GRASP // Saved AI Learning Answers & Notes\n`;
     md += `*Exported on: ${new Date().toLocaleString()}*\n\n---\n\n`;
 
     all.forEach((ans, idx) => {

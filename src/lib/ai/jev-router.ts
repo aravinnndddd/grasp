@@ -49,7 +49,7 @@ export class JevCognitiveRouter {
       task: 'MISCONCEPTION_CLASSIFICATION',
       targetAI: 'JEV_CLASSIFIER',
       modelName: 'JEV-Rubric-Classifier',
-      reasoning: 'Answer evaluation requires rubric keyword matching and misconception detection against known KTU evaluator deductions. Handled by JEV Classifier.',
+      reasoning: 'Answer evaluation requires rubric keyword matching and misconception detection against university valuation standards. Handled by JEV Classifier.',
       confidence: 0.96
     },
     {
@@ -57,7 +57,7 @@ export class JevCognitiveRouter {
       task: 'EXAM_ANSWER_GENERATION',
       targetAI: 'GROQ_LLM',
       modelName: () => GroqClient.getSelectedModel(),
-      reasoning: 'Structured exam synthesis requires high-fidelity pedagogical generation aligned with KTU question blueprints. Routing to Groq LLM.',
+      reasoning: 'Structured exam synthesis requires high-fidelity pedagogical generation aligned with university question blueprints. Routing to Groq LLM.',
       confidence: 0.94
     }
   ];
@@ -81,8 +81,8 @@ export class JevCognitiveRouter {
           ? rule.modelName()
           : rule.modelName;
         const groundingSource = rule.targetAI === 'JEV_CLASSIFIER'
-          ? `KTU 2024 Scheme // ${context.subjectCode}`
-          : `WikiSyllabus KTU 2024 Scheme // ${context.subjectCode} (${context.moduleTitle})`;
+          ? `Standard Curriculum // ${context.subjectCode}`
+          : `Course Syllabus // ${context.subjectCode} (${context.moduleTitle})`;
         return {
           task: rule.task as TaskClassification,
           targetAI: rule.targetAI as 'JEV_CLASSIFIER' | 'GROQ_LLM',
@@ -100,7 +100,7 @@ export class JevCognitiveRouter {
       targetAI: 'GROQ_LLM',
       modelName: GroqClient.getSelectedModel(),
       reasoning: 'Generative inquiry requires open-ended conversational intelligence and Socratic pedagogy grounded in academic textbooks. Routing to Groq LLM.',
-      groundingSource: `Authoritative KTU Textbooks & WikiSyllabus // ${context.subjectCode}`,
+      groundingSource: `Authoritative Engineering Textbooks // ${context.subjectCode}`,
       confidence: 0.92
     };
   }
@@ -149,7 +149,7 @@ export class JevCognitiveRouter {
     // 2. If routed to Free AI LLM
     if (GroqClient.isConfigured()) {
       try {
-        const systemPrompt = `You are GRASP AI, an elite Socratic computer science engineering tutor specifically trained on the APJ Abdul Kalam Technological University (KTU) 2024 Scheme B.Tech CSE syllabus.
+        const systemPrompt = `You are GRASP AI, an elite Socratic computer science engineering tutor.
 Current Subject: ${context.subjectCode} - ${context.subjectTitle}
 Current Module: ${context.moduleTitle}
 ${context.concept ? `Active Concept: ${context.concept.title}\nCategory: ${context.concept.category}` : ''}
@@ -157,7 +157,7 @@ ${context.concept ? `Active Concept: ${context.concept.title}\nCategory: ${conte
 CRITICAL PEDAGOGICAL & FORMATTING REQUIREMENTS:
 1. DETAILED CONCEPTUAL EXPLANATION:
    - "Don't just give facts; explain why it exists, the core intuition, and the failure case it solves."
-   - Structure into clear sections: 1) Core Intuition, 2) Technical Mechanics & Formulas, 3) KTU Exam Valuation Point.
+   - Structure into clear sections: 1) Core Intuition, 2) Technical Mechanics & Formulas, 3) Exam Valuation Point.
 
 2. VISUAL DIAGRAM (MANDATORY - MERMAID OR ARCHITECTURE SCHEMATIC):
    - ALWAYS include a visual diagram! For flows, layered architectures, state machines, or protocol handshakes, use a clean Mermaid diagram code block:
@@ -168,7 +168,7 @@ CRITICAL PEDAGOGICAL & FORMATTING REQUIREMENTS:
      B -->|2. SYN-ACK| C[Server Endpoint]
      C -->|3. ACK Established| A
    \`\`\`
-   - Or include a clean ASCII architecture diagram. KTU evaluators award 40% of marks for diagrams!
+   - Or include a clean ASCII architecture diagram. Evaluators award marks for clean diagrams!
 
 3. CLEAN MARKDOWN TABLES (MANDATORY FOR COMPARISONS & MARK RUBRICS):
    - For mark distributions, algorithm comparisons (e.g., Pure vs Slotted ALOHA), or field specifications, ALWAYS use clean markdown tables with standard header separators:
@@ -179,7 +179,7 @@ CRITICAL PEDAGOGICAL & FORMATTING REQUIREMENTS:
 
 4. EXAMINER'S PRO-TIP CALLOUT:
    - Use blockquote syntax for examiner secrets or common student blunders:
-   > 💡 **KTU EXAM TIP:** Write field names directly inside the packet boxes rather than arrows beside them to secure full evaluator marks!
+   > 💡 **EXAM TIP:** Write field names directly inside the packet boxes rather than arrows beside them to secure full evaluator marks!
 
 5. GEEKSFORGEEKS REFERENCE LINKS (MANDATORY):
    - ALWAYS end the answer with a "### 📚 GeeksforGeeks Reference Links" section containing accurate clickable links to relevant GeeksforGeeks articles for further reading.`;
@@ -298,7 +298,7 @@ CRITICAL PEDAGOGICAL & FORMATTING REQUIREMENTS:
         `  style C fill:#FEF2F2,stroke:#EF4444,stroke-width:2px\n` +
         `  style D fill:#ECFDF5,stroke:#10B981,stroke-width:2px\n` +
         `\`\`\`\n\n` +
-        `### 🏷️ Official KTU Exam Definition:\n${context.concept.examMode.examDefinition}\n\n` +
+        `### 🏷️ Official Exam Definition:\n${context.concept.examMode.examDefinition}\n\n` +
         `### 📝 Model Exam Question & Model Answer:\n` +
         `**Q:** ${context.concept.examMode.answers[1]?.question || context.concept.examMode.answers[0]?.question}\n\n` +
         `**A:**\n${context.concept.examMode.answers[1]?.modelAnswer || context.concept.examMode.answers[0]?.modelAnswer}` +
@@ -312,7 +312,7 @@ CRITICAL PEDAGOGICAL & FORMATTING REQUIREMENTS:
       `\`\`\`mermaid\n` +
       `graph LR\n` +
       `  A["Syllabus Core Module\\n${context.subjectCode}"] --> B["Mathematical Modeling\\n& Theoretical Foundation"]\n` +
-      `  B --> C["KTU University Valuation\\n(Full Model Solution)"]\n` +
+      `  B --> C["University Valuation\\n(Full Model Solution)"]\n` +
       `  style A fill:#FFF7ED,stroke:#EA580C,stroke-width:2px\n` +
       `  style B fill:#EFF6FF,stroke:#2563EB,stroke-width:2px\n` +
       `  style C fill:#ECFDF5,stroke:#059669,stroke-width:2px\n` +

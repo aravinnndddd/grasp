@@ -76,7 +76,7 @@ Respond ONLY with a valid JSON object exactly matching this schema — no extra 
   "moduleNum": <1|2|3|4|0 — module number if detectable, else 0>,
   "category": "<one of: lecture_notes | summary | formula_sheet | exam_solutions | handwritten_scans | custom>",
   "tags": ["<topic1>", "<topic2>", "<topic3>"],
-  "summary": "<A comprehensive, richly formatted markdown study note generated from this document. Include:\\n- ## Core Concepts section with bullet explanations\\n- ## Key Formulas / Algorithms if relevant (use code blocks)\\n- ## Exam Takeaways with 3-mark and 8-mark ready answers\\n- ## Memory Anchors with 1-line analogies for each major concept\\nMake it creative, detailed and KTU-exam-ready. Minimum 400 words.>"
+  "summary": "<A comprehensive, richly formatted markdown study note generated from this document. Include:\\n- ## Core Concepts section with bullet explanations\\n- ## Key Formulas / Algorithms if relevant (use code blocks)\\n- ## Exam Takeaways with high-yield short and long model answers\\n- ## Memory Anchors with 1-line analogies for each major concept\\nMake it creative, detailed and exam-ready. Minimum 400 words.>"
 }
 `;
 
@@ -196,7 +196,7 @@ export const UploadNotesModal: React.FC<UploadNotesModalProps> = ({
           const fallback: DetectedMeta = {
             title: ragIndex.documentTitle,
             subject: 'Engineering Study Material',
-            subjectCode: 'KTU',
+            subjectCode: 'DOC',
             moduleNum: 0,
             category: 'lecture_notes',
             tags: ['PDF', `${ragIndex.totalPages} Pages`, `${ragIndex.totalChunks} Chunks`, 'RAG-Ready'],
@@ -218,10 +218,10 @@ export const UploadNotesModal: React.FC<UploadNotesModalProps> = ({
         const detectedMeta: DetectedMeta = {
           title: ragIndex.documentTitle,
           subject: 'Comprehensive Engineering Courseware',
-          subjectCode: 'KTU',
+          subjectCode: 'DOC',
           moduleNum: 0,
           category: 'lecture_notes',
-          tags: ['RAG-Grounding', `${ragIndex.totalPages} Pages`, `${topicBreakdown.length} Modules`, 'KTU-Exam-Ready'],
+          tags: ['RAG-Grounding', `${ragIndex.totalPages} Pages`, `${topicBreakdown.length} Modules`, 'Exam-Ready'],
           summary: notes
         };
 
@@ -449,7 +449,7 @@ export const UploadNotesModal: React.FC<UploadNotesModalProps> = ({
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-[11px] font-mono-code text-ink-700 flex items-start gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong>AI-Powered:</strong> No need to select subject or module. The AI reads your document and auto-detects everything — then creates a structured, KTU-exam-ready note with concepts, formulas, and memory anchors.
+                  <strong>AI-Powered:</strong> No need to select subject or module. The AI reads your document and auto-detects everything — then creates a structured, exam-ready note with concepts, formulas, and memory anchors.
                 </span>
               </div>
             </div>

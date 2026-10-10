@@ -83,9 +83,10 @@ export function sectioniseNote(rawMarkdown: string, defaultTitle = 'Study Notebo
       currentPageRange = `Page ${pageMatch[1]}`;
     }
 
-    // Check if this line is a top-level section split (## Heading or Module/Chapter)
-    const isHeading2 = trimmed.startsWith('## ') && !trimmed.startsWith('### ');
-    const isMajorDivider = (trimmed === '---' || trimmed === '***') && i + 1 < lines.length && lines[i + 1].trim().startsWith('## ');
+    // Check if this line is a top-level section split (## Heading or # Module / Session)
+    const isModuleHeading = (trimmed.startsWith('# Module ') || trimmed.startsWith('# Session ')) && currentLines.length > 0;
+    const isHeading2 = (trimmed.startsWith('## ') && !trimmed.startsWith('### ')) || isModuleHeading;
+    const isMajorDivider = (trimmed === '---' || trimmed === '***') && i + 1 < lines.length && (lines[i + 1].trim().startsWith('## ') || lines[i + 1].trim().startsWith('# Module '));
 
     if ((isHeading2 || isMajorDivider) && currentLines.length > 0) {
       sectionChunks.push({
@@ -100,9 +101,9 @@ export function sectioniseNote(rawMarkdown: string, defaultTitle = 'Study Notebo
       if (isMajorDivider) {
         // Skip divider line, title will be next line
         i++;
-        currentTitle = lines[i].trim().replace(/^##\s+/, '');
+        currentTitle = lines[i].trim().replace(/^##?\s+/, '');
       } else {
-        currentTitle = trimmed.replace(/^##\s+/, '');
+        currentTitle = trimmed.replace(/^##?\s+/, '');
       }
       continue;
     }

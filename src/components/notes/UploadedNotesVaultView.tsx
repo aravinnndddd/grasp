@@ -26,11 +26,15 @@ import { UploadedNoteNotebookView } from './UploadedNoteNotebookView';
 interface UploadedNotesVaultViewProps {
   currentSubjectId?: string;
   onOpenGroqSettings?: () => void;
+  externalSelectedNoteId?: string | null;
+  onClearExternalSelectedNoteId?: () => void;
 }
 
 export const UploadedNotesVaultView: React.FC<UploadedNotesVaultViewProps> = ({
   currentSubjectId,
-  onOpenGroqSettings
+  onOpenGroqSettings,
+  externalSelectedNoteId,
+  onClearExternalSelectedNoteId
 }) => {
   const [notes, setNotes] = useState<UploadedNote[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -57,6 +61,16 @@ export const UploadedNotesVaultView: React.FC<UploadedNotesVaultViewProps> = ({
   useEffect(() => {
     loadNotes();
   }, []);
+
+  useEffect(() => {
+    if (externalSelectedNoteId && notes.length > 0) {
+      const match = notes.find(n => n.id === externalSelectedNoteId);
+      if (match) {
+        setSelectedNote(match);
+        setSelectedNoteTab('notebook');
+      }
+    }
+  }, [externalSelectedNoteId, notes]);
 
   const handleDeleteNote = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -106,9 +120,9 @@ graph TD
     style E fill:#DCFCE7,stroke:#16A34A,stroke-width:2px
 \`\`\`
 
-### KTU Exam Focus: 3-Mark & 8-Mark Ready Answers
-- **3-Mark**: What is the difference between Lamport logical clocks and vector clocks? Lamport logical clocks provide partial event ordering, whereas vector clocks establish exact causal relationships between concurrent events.
-- **8-Mark**: Explain the Byzantine Generals Problem and state why $3m + 1$ generals are required to tolerate $m$ faulty traitors.
+### Exam & Viva Focus: High-Yield Short & Long Conceptual Model Answers
+- **Short Answer**: What is the difference between Lamport logical clocks and vector clocks? Lamport logical clocks provide partial event ordering, whereas vector clocks establish exact causal relationships between concurrent events.
+- **Long Answer**: Explain the Byzantine Generals Problem and state why $3m + 1$ generals are required to tolerate $m$ faulty traitors.
 
 ---
 
@@ -183,7 +197,7 @@ graph TD
       fileName: 'Distributed_Systems_Complete_Courseware_104_Pages.pdf',
       fileSize: 104 * 4096,
       content: sampleContent,
-      tags: ['RAG-Grounding', '104 Pages', '3 Diagrams', 'KTU-Exam-Ready'],
+      tags: ['RAG-Grounding', '104 Pages', '3 Diagrams', 'Exam-Ready'],
       author: 'In-Browser RAG Engine',
       aiSummary: sampleSummary
     });
@@ -205,7 +219,10 @@ graph TD
     return (
       <UploadedNoteNotebookView
         note={selectedNote}
-        onBack={() => setSelectedNote(null)}
+        onBack={() => {
+          setSelectedNote(null);
+          onClearExternalSelectedNoteId?.();
+        }}
         onOpenGroqSettings={onOpenGroqSettings}
         initialViewMode={selectedNoteTab}
       />
@@ -426,7 +443,7 @@ graph TD
                 <div className="space-y-3 pl-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="px-2.5 py-0.5 bg-ink-900 text-white font-mono-code font-bold text-[10px] rounded uppercase">
-                      {item.subjectCode || 'KTU'}
+                      {item.subjectCode || 'NOTE'}
                     </span>
 
                     <div className="flex items-center gap-1">
